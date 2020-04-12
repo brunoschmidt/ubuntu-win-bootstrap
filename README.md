@@ -10,6 +10,7 @@ This is a very simple (for now) script to set up a NEW UNMODIFIED [`Windows Subs
 * Rust compiler
 * Nmap and Ncat
 * Fish shell with OMFish
+* Various shell tools like: sd, ex, fd, exa
 
 Note also since WSL is basically just a standard Ubuntu installation this sctipt should also work unmodified on an Ubuntu Distribution, though currently untested.
 
@@ -17,6 +18,7 @@ Note also since WSL is basically just a standard Ubuntu installation this sctipt
 
 ## Usage
 The simplest way to use this script is to clone into a completely new WSL environment. If you already have a configured WSL system there are instructions below on how to reset this to 'factory' defaults __[TODO]__.
+
 From within WSL run the following:
 ```
 git clone https://github.com/seapagan/ubuntu-win-bootstrap.git
