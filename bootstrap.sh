@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # these will run as the default non-privileged user.
 
-# save the path to this script for later use
-THISPATH="$(dirname $(readlink -f "$0"))"
-echo "We are running from : $THISPATH"
+# create a temp dir
+TEMPPATH="$(mktemp -d)"
+echo "Temporary storage : $TEMPPATH"
 
 # save distro
 DISTRO=$(sed -rn '/CODENAME/ s/.*=//p' /etc/lsb-release)
@@ -21,6 +21,9 @@ echo "deb https://deb.nodesource.com/node_12.x $DISTRO main" | sudo tee /etc/apt
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24
 echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu/ $DISTRO main" | sudo tee /etc/apt/sources.list.d/git-core.list > /dev/null
 
+curl -s https://packages.microsoft.com/config/ubuntu/19.10/packages-microsoft-prod.deb -o $TEMPPATH/packages-microsoft-prod.deb
+sudo dpkg -i $TEMPPATH/packages-microsoft-prod.deb
+
 # ensure we have the latest packages
 sudo apt update
 sudo apt -y full-upgrade
@@ -30,12 +33,12 @@ sudo apt install -y \
   lsb-release build-essential curl wget gettext \
   nmap ncat \
   vim git \
-  nodejs jq\
-  rustc \
-  ripgrep fd-find bat \
+  nodejs rustc dotnet-sdk-3.1 aspnetcore-runtime-3.1 dotnet-runtime-3.1\
+  jq \
   fish
 
-cargo install hyperfine sd hx exa
+# install cli tools from rust
+cargo install hyperfine sd hx exa bat ripgrep fd-find
 
 # install winbind and support lib to ping WINS hosts
 sudo apt install -y winbind libnss-winbind
