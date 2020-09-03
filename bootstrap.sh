@@ -24,44 +24,46 @@ log "Identified Distro : $DISTRO"
 section "Add pre-install requirements"
 sudo apt install -y gnupg build-essential
 
-section "Fix nanosleep for WSL, restoring the old behaviour of nanosleep() to use CLOCK_MONOTONIC"
-cat > $TEMPPATH/nanosleep.c << EOL
-#define  _GNU_SOURCE
-#include <time.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/epoll.h>
-#include <dlfcn.h>
-int nanosleep(const struct timespec *req, struct timespec *rem) {
-    return clock_nanosleep(CLOCK_MONOTONIC, 0, req, rem);
-}
-int usleep(useconds_t usec) {
-    struct timespec req = { .tv_sec     = (usec / 1000000), .tv_nsec    = (usec % 1000000) * 1000, };
-    return nanosleep(&req, NULL);
-}
-static int min(int a, int b) { return a < b ? a : b; }
-static int (*waitfn)(int fd, struct epoll_event *events, int maxevents, int timeout, const __sigset_t *ss) = 0;
-int epoll_pwait(int fd, struct epoll_event *events, int maxevents, int timeout, const __sigset_t *ss) {
-  if (!waitfn)
-    waitfn = (int (*)(int fd, struct epoll_event *events, int maxevents, int timeout, const __sigset_t *ss)) dlsym(RTLD_NEXT, "epoll_pwait");
-  while (1) {
-    int r = waitfn(fd, events, maxevents, 0, ss);
-    if (r > 0 || timeout == 0)
-      return r;
-    if (timeout < 0)
-      usleep(100 * 10000);
-    else {
-      int s = min(1000, timeout);
-      timeout -= s;
-      usleep(s * 1000);
-    }
-  }
-  return -1;
-}
+if [ `which wsl.exe` ]; then
+        section "Fix nanosleep for WSL, restoring the old behaviour of nanosleep() to use CLOCK_MONOTONIC"
+        cat > $TEMPPATH/nanosleep.c << EOL
+                #define  _GNU_SOURCE
+                #include <time.h>
+                #include <unistd.h>
+                #include <signal.h>
+                #include <sys/epoll.h>
+                #include <dlfcn.h>
+                int nanosleep(const struct timespec *req, struct timespec *rem) {
+                        return clock_nanosleep(CLOCK_MONOTONIC, 0, req, rem);
+                }
+                int usleep(useconds_t usec) {
+                        struct timespec req = { .tv_sec     = (usec / 1000000), .tv_nsec    = (usec % 1000000) * 1000, };
+                        return nanosleep(&req, NULL);
+                }
+                static int min(int a, int b) { return a < b ? a : b; }
+                static int (*waitfn)(int fd, struct epoll_event *events, int maxevents, int timeout, const __sigset_t *ss) = 0;
+                int epoll_pwait(int fd, struct epoll_event *events, int maxevents, int timeout, const __sigset_t *ss) {
+                        if (!waitfn)
+                                waitfn = (int (*)(int fd, struct epoll_event *events, int maxevents, int timeout, const __sigset_t *ss)) dlsym(RTLD_NEXT, "epoll_pwait");
+                        while (1) {
+                                int r = waitfn(fd, events, maxevents, 0, ss);
+                                if (r > 0 || timeout == 0)
+                                        return r;
+                                if (timeout < 0)
+                                        usleep(100 * 10000);
+                                else {
+                                        int s = min(1000, timeout);
+                                        timeout -= s;
+                                        usleep(s * 1000);
+                                }
+                        }
+                        return -1;
+                }
 EOL
-gcc -shared -fPIC -o "$TEMPPATH/libnanosleep.so" "$TEMPPATH/nanosleep.c"
-sudo mv "$TEMPPATH/libnanosleep.so" /usr/local/lib/libnanosleep.so
-echo /usr/local/lib/libnanosleep.so | sudo tee -a /etc/ld.so.preload > /dev/null
+        gcc -shared -fPIC -o "$TEMPPATH/libnanosleep.so" "$TEMPPATH/nanosleep.c"
+        sudo mv "$TEMPPATH/libnanosleep.so" /usr/local/lib/libnanosleep.so
+        echo /usr/local/lib/libnanosleep.so | sudo tee -a /etc/ld.so.preload > /dev/null
+fi
 
 section "Switch apt to https mirror"
 sudo sed -i '/^deb/ s,http://archive.ubuntu.com/ubuntu/,https://mirrors.edge.kernel.org/ubuntu/,' /etc/apt/sources.list
@@ -144,7 +146,7 @@ section "Basic fish config"
 mkdir -p ~/.config/fish/conf.d/
 cat > ~/.config/fish/conf.d/welcome.fish << EOL
 function fish_greeting
-        update-motd --show-only
+        # update-motd --show-only
 end
 EOL
 
@@ -160,7 +162,7 @@ EOL
 
 section "Fish load profile"
 cat > ~/.config/fish/conf.d/profile.fish << EOL
-status --is-login; and fenv ~/.profile
+status --is-login; and fenv '. ~/.profile'
 EOL
 
 section "Profile PATH to cargo bins"
