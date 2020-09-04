@@ -26,7 +26,7 @@ sudo apt install -y gnupg build-essential
 
 if [ `which wsl.exe` ]; then
         section "Fix nanosleep for WSL, restoring the old behaviour of nanosleep() to use CLOCK_MONOTONIC"
-        cat > $TEMPPATH/nanosleep.c << EOL
+        cat > $TEMPPATH/nanosleep.c << 'EOL'
                 #define  _GNU_SOURCE
                 #include <time.h>
                 #include <unistd.h>
@@ -105,7 +105,7 @@ echo prefix=$HOME/.local/ >> ~/.npmrc
 npm install -g npm
 
 section "Basic .gitconfig"
-cat > ~/.gitconfig << EOL
+cat > ~/.gitconfig << 'EOL'
 [user]
         name = Bruno Schmidt
         email = bruno.schmidt@gmail.com
@@ -133,7 +133,7 @@ cat > ~/.gitconfig << EOL
 EOL
 
 section "Basic .bash_aliases"
-cat > ~/.bash_aliases << EOL
+cat > ~/.bash_aliases << 'EOL'
 #alias ls="ls -vh --color=auto"
 alias ls="exa -gbH"
 alias l="ls -l --git"
@@ -144,14 +144,14 @@ EOL
 
 section "Basic fish config"
 mkdir -p ~/.config/fish/conf.d/
-cat > ~/.config/fish/conf.d/welcome.fish << EOL
+cat > ~/.config/fish/conf.d/welcome.fish << 'EOL'
 function fish_greeting
         # update-motd --show-only
 end
 EOL
 
 section "Basic fish aliases"
-cat > ~/.config/fish/conf.d/alias.fish << EOL
+cat > ~/.config/fish/conf.d/alias.fish << 'EOL'
 #alias ls "ls -vh --color=auto"
 alias ls "exa -gbH"
 alias l "ls -l --git"
@@ -161,16 +161,19 @@ alias map "xargs -n1"
 EOL
 
 section "Fish load profile"
-cat > ~/.config/fish/conf.d/profile.fish << EOL
+cat > ~/.config/fish/conf.d/profile.fish << 'EOL'
 status --is-login; and fenv '. ~/.profile'
 EOL
 
 section "Profile PATH to cargo bins"
-cat >> ~/.profile << EOL
+cat >> ~/.profile << 'EOL'
 # Set PATH so it includes user's private Cargo bin if it exists
 if [ -d "$HOME/.cargo/bin" ] ; then
     PATH="$HOME/.cargo/bin:$PATH"
 fi
+
+# Optout of DotNet Telemetry
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
 EOL
 
 section "Install omf"
