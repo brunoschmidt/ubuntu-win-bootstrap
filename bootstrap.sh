@@ -22,7 +22,8 @@ DISTRO=$(sed -rn '/CODENAME/ s/.*=//p' /etc/lsb-release)
 log "Identified Distro : $DISTRO"
 
 section "Add pre-install requirements"
-sudo apt install -y gnupg build-essential
+sudo apt update
+sudo apt install -y gnupg build-essential pkg-config dirmngr
 
 if [ `which wsl.exe` ]; then
         section "Fix nanosleep for WSL, restoring the old behaviour of nanosleep() to use CLOCK_MONOTONIC"
@@ -185,7 +186,7 @@ fish -c "omf install agnoster"
 section "Install fish helpers"
 fish -c "omf install foreign-env bass"
 
-section "Enable UNC paths at cmd.exe to allow access to \\$wsl\"
+section "Enable UNC paths at cmd.exe to allow access to \\\\$wsl\\"
 which reg.exe >/dev/null && reg.exe add "HKCU\Software\Microsoft\Command Processor" /v DisableUNCCheck /t REG_DWORD /d 0x1 /f
 
 
