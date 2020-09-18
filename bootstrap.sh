@@ -74,6 +74,8 @@ curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add 
 echo "deb https://deb.nodesource.com/node_12.x $DISTRO main" | sudo tee /etc/apt/sources.list.d/nodesource.list > /dev/null
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E6030699E45FA1715D88E1DF1F24
 echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu/ $DISTRO main" | sudo tee /etc/apt/sources.list.d/git-core.list > /dev/null
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+echo "deb https://cli.github.com/packages $DISTRO main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 
 curl -s https://packages.microsoft.com/config/ubuntu/19.10/packages-microsoft-prod.deb -o $TEMPPATH/packages-microsoft-prod.deb
 sudo dpkg -i $TEMPPATH/packages-microsoft-prod.deb
@@ -86,7 +88,7 @@ section "Make sure we have the required libraries and tools already installed be
 sudo apt install -y \
   lsb-release build-essential curl wget gettext \
   nmap ncat mosh \
-  vim git \
+  vim git gh \
   nodejs rustc dotnet-sdk-3.1 aspnetcore-runtime-3.1 dotnet-runtime-3.1\
   jq unzip mmv \
   fish
