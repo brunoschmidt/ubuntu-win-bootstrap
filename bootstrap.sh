@@ -105,6 +105,21 @@ section "Basic .npmrc"
 echo prefix=$HOME/.local/ >> ~/.npmrc
 npm install -g npm
 
+section "Basic .ssh"
+mkdir -p ~/.ssh/config.d
+cat > ~/.ssh/config << 'EOL'
+# base configuration(s)
+Include config.d/*
+EOL
+cat > ~/.ssh/config.d/00-base-ssh.conf << 'EOL'
+# Prevent timeouts on devboxes
+ServerAliveInterval 30
+ServerAliveCountMax 4
+
+Host *
+	ForwardAgent yes
+EOL
+
 section "Basic .gitconfig"
 cat > ~/.gitconfig << 'EOL'
 [user]
