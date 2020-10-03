@@ -168,6 +168,10 @@ cat > ~/.gitconfig << 'EOL'
         showUntrackedFiles = all
 [url "https://github.com/"]
         insteadOf = gh
+[url "git@github.com:brunoschmidt/"]
+        insteadOf = bbs:
+[url "abcbrasil@vs-ssh.visualstudio.com:v3/abcbrasil/"]
+        insteadOf = abc:
 EOL
 
 section "Basic .bash_aliases"
