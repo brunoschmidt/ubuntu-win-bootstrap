@@ -19,7 +19,9 @@ log "Temporary storage : $TEMPPATH"
 
 section "Save distro"
 DISTRO=$(sed -rn '/CODENAME/ s/.*=//p' /etc/lsb-release)
+DISTRO_RELEASE=$(sed -rn '/RELEASE/ s/.*=//p' /etc/lsb-release)
 log "Identified Distro : $DISTRO"
+log "Identified Distro Release: $RELEASE"
 
 section "Add pre-install requirements"
 sudo apt update
@@ -76,8 +78,7 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DD270288B4E60306
 echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu/ $DISTRO main" | sudo tee /etc/apt/sources.list.d/git-core.list > /dev/null
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
 echo "deb https://cli.github.com/packages $DISTRO main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-
-curl -s https://packages.microsoft.com/config/ubuntu/19.10/packages-microsoft-prod.deb -o $TEMPPATH/packages-microsoft-prod.deb
+curl -s https://packages.microsoft.com/config/ubuntu/$DISTRO_RELEASE/packages-microsoft-prod.deb -o $TEMPPATH/packages-microsoft-prod.deb
 sudo dpkg -i $TEMPPATH/packages-microsoft-prod.deb
 
 section "Ensure we have the latest packages"
@@ -96,12 +97,30 @@ sudo apt install -y \
 section "Install cli tools from rust"
 cargo install hyperfine sd hx exa bat ripgrep fd-find
 
+section "Install Powershell Core"
+dotnet tool install -g powershell
+
 section "Install winbind and support lib to ping WINS hosts"
 sudo apt install -y winbind libnss-winbind
 # need to append to the /etc/nsswitch.conf file to enable if not already done ...
 if ! grep -qc 'wins' /etc/nsswitch.conf ; then
   sudo sed -i '/hosts:/ s/$/ wins/' /etc/nsswitch.conf
 fi
+
+section "User Shell profile config dir"
+mkdir -p ~/.config/shell/profile.d/
+cat >> ~/.profile << 'EOL'
+
+# Load general profile configurations
+if [ -d ~/.config/shell/profile.d ]; then
+        for i in ~/.config/shell/profile.d/*.sh; do
+                if [ -r $i ]; then
+                        . $i
+                fi
+        done
+        unset i
+fi
+EOL
 
 section "Basic .npmrc"
 echo prefix=$HOME/.local/ >> ~/.npmrc
@@ -183,15 +202,12 @@ cat > ~/.config/fish/conf.d/profile.fish << 'EOL'
 status --is-login; and fenv '. ~/.profile'
 EOL
 
-section "Profile PATH to cargo bins"
-cat >> ~/.profile << 'EOL'
+section "PATH to cargo bins"
+cat >> ~/.config/shell/profile.d/80-rust-cargo.sh << 'EOL'
 # Set PATH so it includes user's private Cargo bin if it exists
 if [ -d "$HOME/.cargo/bin" ] ; then
     PATH="$HOME/.cargo/bin:$PATH"
 fi
-
-# Optout of DotNet Telemetry
-export DOTNET_CLI_TELEMETRY_OPTOUT=1
 EOL
 
 section "Install omf"
@@ -206,6 +222,18 @@ fish -c "omf install foreign-env bass"
 section "Enable UNC paths at cmd.exe to allow access to \\\\$wsl\\"
 which reg.exe >/dev/null && reg.exe add "HKCU\Software\Microsoft\Command Processor" /v DisableUNCCheck /t REG_DWORD /d 0x1 /f
 
+section "PATH to DotNet tools bins"
+cat >> ~/.config/shell/profile.d/80-dotnet-tools.sh << 'EOL'
+# Set PATH so it includes user's private DotNet Tools bin if it exists
+if [ -d "$HOME/.dotnet/tools" ] ; then
+    PATH="$HOME/.dotnet/tools:$PATH"
+fi
+EOL
+section "Disable DotNEt Telemetry"
+cat >> ~/.config/shell/profile.d/40-dotnet-telemetry.sh << 'EOL'
+# Optout of DotNet Telemetry
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+EOL
 
 section "You now need to close and restart the Bash shell"
 rm -rf "$TEMPPATH"
