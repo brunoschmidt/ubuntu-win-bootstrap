@@ -89,7 +89,7 @@ section "Make sure we have the required libraries and tools already installed be
 sudo apt install -y \
   lsb-release build-essential curl wget gettext \
   nmap ncat mosh \
-  vim git gh \
+  vim git git-flow gh \
   nodejs rustc dotnet-sdk-3.1 aspnetcore-runtime-3.1 dotnet-runtime-3.1\
   jq unzip mmv \
   fish
@@ -157,6 +157,7 @@ cat > ~/.gitconfig << 'EOL'
         lol = log --graph --decorate --pretty=oneline
 	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
         amend = commit --amend
+        f = flow
 [push]
         default = simple
 [credential]
@@ -176,6 +177,7 @@ alias ls="exa -gbH"
 alias l="ls -l --git"
 alias ll="ls -laF"
 alias g="git"
+alias gf="git flow"
 alias map="xargs -n1"
 EOL
 
@@ -194,6 +196,7 @@ alias ls "exa -gbH"
 alias l "ls -l --git"
 alias ll "ls -laF"
 alias g "git"
+alias gf "git flow"
 alias map "xargs -n1"
 EOL
 
