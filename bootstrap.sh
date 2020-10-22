@@ -199,6 +199,7 @@ alias ll="ls -laF"
 alias g="git"
 alias gf="git flow"
 alias map="xargs -n1"
+alias open="wslview"
 EOL
 
 section "Basic fish config"
@@ -219,6 +220,7 @@ alias ll "ls -laF"
 alias g "git"
 alias gf "git flow"
 alias map "xargs -n1"
+alias open "wslview"
 EOL
 
 section "Fish load profile"
@@ -254,9 +256,6 @@ Import-Module oh-my-posh
 Set-Theme Agnoster
 EOL
 
-section "Enable UNC paths at cmd.exe to allow access to \\\\$wsl\\"
-which reg.exe >/dev/null && reg.exe add "HKCU\Software\Microsoft\Command Processor" /v DisableUNCCheck /t REG_DWORD /d 0x1 /f
-
 section "Install cheat.sh"
 curl https://cht.sh/:cht.sh > ~/.local/bin/cht.sh
 chmod +x ~/.local/bin/cht.sh
@@ -274,6 +273,12 @@ cat >> ~/.config/shell/profile.d/40-dotnet-telemetry.sh << 'EOL'
 # Optout of DotNet Telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 EOL
+
+section "Enable UNC paths at cmd.exe to allow access to \\\\$wsl\\"
+which reg.exe >/dev/null && reg.exe add "HKCU\Software\Microsoft\Command Processor" /v DisableUNCCheck /t REG_DWORD /d 0x1 /f
+
+section "Enable Windows LongPath support breaking very old Win32 compatibility"
+which reg.exe >/dev/null && reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 0x1 /f
 
 section "You now need to close and restart the Bash shell"
 rm -rf "$TEMPPATH"
