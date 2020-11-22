@@ -107,6 +107,13 @@ cargo install hyperfine sd hx exa bat ripgrep fd-find
 section "Install Powershell Core"
 dotnet tool install -g powershell
 
+section "Install Deno"
+export DENO_INSTALL=~/.local
+curl -fsSL https://deno.land/x/install/install.sh | sh
+cat >> ~/.config/shell/profile.d/40-dotnet-telemetry.sh << 'EOL'
+export export DENO_INSTALL=~/.local
+EOL
+
 section "Install winbind and support lib to ping WINS hosts"
 sudo apt install -y winbind libnss-winbind
 # need to append to the /etc/nsswitch.conf file to enable if not already done ...
