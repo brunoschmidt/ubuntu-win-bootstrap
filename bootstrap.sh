@@ -97,7 +97,7 @@ sudo apt install -y \
   lsb-release build-essential gettext \
   nmap ncat mosh curl wget \
   vim git git-flow gh \
-  nodejs rustc dotnet-sdk-3.1 aspnetcore-runtime-3.1 dotnet-runtime-3.1 \
+  nodejs rustc dotnet-sdk-5.0 aspnetcore-runtime-5.0 dotnet-runtime-5.0 \
   jq unzip mmv \
   fish
 
