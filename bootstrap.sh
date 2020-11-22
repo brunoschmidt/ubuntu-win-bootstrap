@@ -12,6 +12,10 @@ function log {
         echo -e "\e[33m\e[1m\n### $*\e[0m"
 }
 
+if [ "0" -eq "$(id -u)" ]; then
+        section "These must run as the default non-privileged user with sudo access."
+        exit
+fi
 
 section "Create a temp dir"
 TEMPPATH="$(mktemp -d)"
@@ -22,6 +26,9 @@ DISTRO=$(sed -rn '/CODENAME/ s/.*=//p' /etc/lsb-release)
 DISTRO_RELEASE=$(sed -rn '/RELEASE/ s/.*=//p' /etc/lsb-release)
 log "Identified Distro : $DISTRO"
 log "Identified Distro Release: $RELEASE"
+
+section "Create a '.local/bin'"
+[ -d ~/.local/bin ] || mkdir -p ~/.local/bin
 
 section "Add pre-install requirements"
 sudo apt update
@@ -87,10 +94,10 @@ sudo apt -y full-upgrade
 
 section "Make sure we have the required libraries and tools already installed before starting."
 sudo apt install -y \
-  lsb-release build-essential curl wget gettext \
-  nmap ncat mosh \
+  lsb-release build-essential gettext \
+  nmap ncat mosh curl wget \
   vim git git-flow gh \
-  nodejs rustc dotnet-sdk-3.1 aspnetcore-runtime-3.1 dotnet-runtime-3.1\
+  nodejs rustc dotnet-sdk-3.1 aspnetcore-runtime-3.1 dotnet-runtime-3.1 \
   jq unzip mmv \
   fish
 
@@ -166,6 +173,8 @@ cat > ~/.gitconfig << 'EOL'
         ui = True
 [status]
         showUntrackedFiles = all
+[diff]
+        algorithm = histogram
 [url "https://github.com/"]
         insteadOf = gh
 [url "git@github.com:brunoschmidt/"]
@@ -177,7 +186,7 @@ EOL
 section "Basic .bash_aliases"
 cat > ~/.bash_aliases << 'EOL'
 #alias ls="ls -vh --color=auto"
-alias ls="exa -gbH"
+alias ls="exa -gbH --group-directories-first"
 alias l="ls -l --git"
 alias ll="ls -laF"
 alias g="git"
@@ -194,9 +203,10 @@ end
 EOL
 
 section "Basic fish aliases"
+mkdir -p ~/.config/fish/conf.d/
 cat > ~/.config/fish/conf.d/alias.fish << 'EOL'
 #alias ls "ls -vh --color=auto"
-alias ls "exa -gbH"
+alias ls "exa -gbH --group-directories-first"
 alias l "ls -l --git"
 alias ll "ls -laF"
 alias g "git"
@@ -206,10 +216,10 @@ EOL
 
 section "Fish load profile"
 cat > ~/.config/fish/conf.d/profile.fish << 'EOL'
-status --is-login; and fenv '. ~/.profile'
+status --is-login; and fenv 'source ~/.profile'
 EOL
 
-section "PATH to cargo bins"
+section "Profile PATH to cargo bins"
 cat >> ~/.config/shell/profile.d/80-rust-cargo.sh << 'EOL'
 # Set PATH so it includes user's private Cargo bin if it exists
 if [ -d "$HOME/.cargo/bin" ] ; then
@@ -229,6 +239,10 @@ fish -c "omf install foreign-env bass"
 section "Enable UNC paths at cmd.exe to allow access to \\\\$wsl\\"
 which reg.exe >/dev/null && reg.exe add "HKCU\Software\Microsoft\Command Processor" /v DisableUNCCheck /t REG_DWORD /d 0x1 /f
 
+section "Install cheat.sh"
+curl https://cht.sh/:cht.sh > ~/.local/bin/cht.sh
+chmod +x ~/.local/bin/cht.sh
+
 section "PATH to DotNet tools bins"
 cat >> ~/.config/shell/profile.d/80-dotnet-tools.sh << 'EOL'
 # Set PATH so it includes user's private DotNet Tools bin if it exists
@@ -236,7 +250,8 @@ if [ -d "$HOME/.dotnet/tools" ] ; then
     PATH="$HOME/.dotnet/tools:$PATH"
 fi
 EOL
-section "Disable DotNEt Telemetry"
+
+section "Disable DotNet Telemetry"
 cat >> ~/.config/shell/profile.d/40-dotnet-telemetry.sh << 'EOL'
 # Optout of DotNet Telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
