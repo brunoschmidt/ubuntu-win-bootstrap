@@ -243,6 +243,17 @@ fish -c "omf install agnoster"
 section "Install fish helpers"
 fish -c "omf install foreign-env bass"
 
+section "Install ohmy-posh"
+pwsh -Command 'Install-Module posh-git -Scope CurrentUser -Force -Confirm'
+pwsh -Command 'Install-Module oh-my-posh -Scope CurrentUser -Force -Confir'
+pwsh -Command 'Install-Module -Name PSReadLine -AllowPrerelease -Scope CurrentUser -Force -SkipPublisherCheck'
+mkdir -p ~/.config/powershell
+cat >> ~/.config/powershell/Microsoft.PowerShell_profile.ps1 << 'EOL'
+Import-Module posh-git
+Import-Module oh-my-posh
+Set-Theme Agnoster
+EOL
+
 section "Enable UNC paths at cmd.exe to allow access to \\\\$wsl\\"
 which reg.exe >/dev/null && reg.exe add "HKCU\Software\Microsoft\Command Processor" /v DisableUNCCheck /t REG_DWORD /d 0x1 /f
 
